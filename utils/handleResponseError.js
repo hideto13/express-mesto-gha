@@ -7,6 +7,11 @@ module.exports.handleResponseError = (err, res) => {
     });
   }
   if (err.name === 'CastError') {
+    return res.status(ERROR_CODE_INVALID_DATA).send({
+      message: 'Некорректно введен ID',
+    });
+  }
+  if (err.name === 'TypeError') {
     return res.status(ERROR_CODE_NOT_FOUND).send({
       message: 'ID не найден',
     });

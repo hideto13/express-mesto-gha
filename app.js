@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { ERROR_CODE_NOT_FOUND } = require('./utils/constants');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -20,6 +21,12 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 
 app.use('/cards', require('./routes/cards'));
+
+app.use((req, res) => {
+  res.status(ERROR_CODE_NOT_FOUND).send({
+    message: 'Некорректный запрос',
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
