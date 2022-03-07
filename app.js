@@ -23,5 +23,5 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.listen(PORT, () => {
-  console.log('Ссылка на сервер:');
+  console.log(`Server is running on port ${PORT}`);
 });

@@ -1,15 +1,16 @@
 const User = require('../models/user');
+const { handleResponseError } = require('../utils/handleResponseError');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.createUser = (req, res) => {
@@ -17,7 +18,7 @@ module.exports.createUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.updateUser = (req, res) => {
@@ -29,7 +30,7 @@ module.exports.updateUser = (req, res) => {
     upsert: true,
   })
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.updateAvatar = (req, res) => {
@@ -41,5 +42,5 @@ module.exports.updateAvatar = (req, res) => {
     upsert: true,
   })
     .then((userAvatar) => res.send({ data: userAvatar }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };

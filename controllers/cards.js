@@ -1,9 +1,10 @@
 const Card = require('../models/card');
+const { handleResponseError } = require('../utils/handleResponseError');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.createCard = (req, res) => {
@@ -11,13 +12,13 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.likeCard = (req, res) => {
@@ -27,7 +28,7 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -37,5 +38,5 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => handleResponseError(err, res));
 };
