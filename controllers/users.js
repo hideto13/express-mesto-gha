@@ -1,15 +1,25 @@
 const User = require('../models/user');
 const { handleResponseError } = require('../utils/handleResponseError');
 
+const getUserObj = (user) => {
+  const obj = {
+    _id: user._id,
+    name: user.name,
+    about: user.about,
+    avatar: user.avatar,
+  };
+  return obj;
+};
+
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => res.send(users.map((user) => getUserObj(user))))
     .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(getUserObj(user)))
     .catch((err) => handleResponseError(err, res));
 };
 
@@ -17,7 +27,7 @@ module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(getUserObj(user)))
     .catch((err) => handleResponseError(err, res));
 };
 
@@ -29,7 +39,7 @@ module.exports.updateUser = (req, res) => {
     runValidators: true,
     upsert: true,
   })
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send(getUserObj(user)))
     .catch((err) => handleResponseError(err, res));
 };
 
@@ -41,6 +51,6 @@ module.exports.updateAvatar = (req, res) => {
     runValidators: true,
     upsert: true,
   })
-    .then((userAvatar) => res.send({ data: userAvatar }))
+    .then((user) => res.send(getUserObj(user)))
     .catch((err) => handleResponseError(err, res));
 };
