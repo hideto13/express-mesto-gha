@@ -29,6 +29,9 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
+    .orFail(() => {
+      throw new Error('NotFound');
+    })
     .then((card) => res.send(getCardObj(card)))
     .catch((err) => handleResponseError(err, res));
 };
@@ -39,6 +42,9 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      throw new Error('NotFound');
+    })
     .then((card) => res.send(getCardObj(card)))
     .catch((err) => handleResponseError(err, res));
 };
@@ -49,6 +55,9 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      throw new Error('NotFound');
+    })
     .then((card) => res.send(getCardObj(card)))
     .catch((err) => handleResponseError(err, res));
 };

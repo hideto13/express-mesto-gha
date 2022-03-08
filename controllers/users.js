@@ -19,6 +19,9 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
+    .orFail(() => {
+      throw new Error('NotFound');
+    })
     .then((user) => res.send(getUserObj(user)))
     .catch((err) => handleResponseError(err, res));
 };
@@ -39,6 +42,9 @@ module.exports.updateUser = (req, res) => {
     runValidators: true,
     upsert: true,
   })
+    .orFail(() => {
+      throw new Error('NotFound');
+    })
     .then((user) => res.send(getUserObj(user)))
     .catch((err) => handleResponseError(err, res));
 };
@@ -51,6 +57,9 @@ module.exports.updateAvatar = (req, res) => {
     runValidators: true,
     upsert: true,
   })
+    .orFail(() => {
+      throw new Error('NotFound');
+    })
     .then((user) => res.send(getUserObj(user)))
     .catch((err) => handleResponseError(err, res));
 };

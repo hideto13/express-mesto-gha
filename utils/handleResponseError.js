@@ -11,7 +11,7 @@ module.exports.handleResponseError = (err, res) => {
       message: 'Некорректно введен ID',
     });
   }
-  if (err.name === 'TypeError') {
+  if (err.message === 'NotFound') {
     return res.status(ERROR_CODE_NOT_FOUND).send({
       message: 'ID не найден',
     });
