@@ -35,12 +35,11 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.updateUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name, about, avatar }, {
+  User.findByIdAndUpdate(req.user._id, { name, about }, {
     new: true,
     runValidators: true,
-    upsert: true,
   })
     .orFail(() => {
       throw new Error('NotFound');
@@ -55,7 +54,6 @@ module.exports.updateAvatar = (req, res) => {
   User.findByIdAndUpdate(req.user._id, { avatar }, {
     new: true,
     runValidators: true,
-    upsert: true,
   })
     .orFail(() => {
       throw new Error('NotFound');
