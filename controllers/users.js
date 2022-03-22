@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { handleResponseError } = require('../utils/handleResponseError');
 
@@ -7,6 +8,8 @@ const getUserObj = (user) => {
     name: user.name,
     about: user.about,
     avatar: user.avatar,
+    password: user.password,
+    email: user.email,
   };
   return obj;
 };
@@ -27,20 +30,33 @@ module.exports.getUser = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name, email, password, about, avatar,
+  } = req.body;
 
-  User.create({ name, about, avatar })
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, email, password: hash, about, avatar,
+    }))
     .then((user) => res.send(getUserObj(user)))
     .catch((err) => handleResponseError(err, res));
 };
 
 module.exports.updateUser = (req, res) => {
-  const { name, about } = req.body;
+  const {
+    name, about, email, password,
+  } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name, about }, {
-    new: true,
-    runValidators: true,
-  })
+  User.findByIdAndUpdate(
+    req.user._id,
+    {
+      name, about, email, password,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
     .orFail(() => {
       throw new Error('NotFound');
     })
@@ -51,10 +67,14 @@ module.exports.updateUser = (req, res) => {
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { avatar }, {
-    new: true,
-    runValidators: true,
-  })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    {
+      new: true,
+      runValidators: true,
+    },
+  )
     .orFail(() => {
       throw new Error('NotFound');
     })
