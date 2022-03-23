@@ -1,5 +1,7 @@
 const Card = require('../models/card');
-const { handleResponseError } = require('../utils/handleResponseError');
+const NotFoundError = require('../errors/NotFound');
+const ForbiddenError = require('../errors/Forbidden');
+// const { handleResponseError } = require('../utils/handleResponseError');
 
 const getCardObj = (card) => {
   const obj = {
@@ -13,51 +15,58 @@ const getCardObj = (card) => {
   return obj;
 };
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards.map((card) => getCardObj(card))))
-    .catch((err) => handleResponseError(err, res));
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(getCardObj(card)))
-    .catch((err) => handleResponseError(err, res));
+    .catch(next);
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
+module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError('ID не найден');
     })
-    .then((card) => res.send(getCardObj(card)))
-    .catch((err) => handleResponseError(err, res));
+    .then((card) => {
+      if (req.user !== card.owner) {
+        throw new ForbiddenError('Нет доступа');
+      }
+    }).then(() => {
+      Card.deleteOne(req.params.cardId)
+        .then((card) => res.send(getCardObj(card)));
+    })
+    .catch(next);
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError('ID не найден');
     })
     .then((card) => res.send(getCardObj(card)))
-    .catch((err) => handleResponseError(err, res));
+    .catch(next);
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
     .orFail(() => {
-      throw new Error('NotFound');
+      throw new NotFoundError('ID не найден');
     })
     .then((card) => res.send(getCardObj(card)))
-    .catch((err) => handleResponseError(err, res));
+    .catch(next);
 };

@@ -16,6 +16,11 @@ module.exports.handleResponseError = (err, res) => {
       message: 'ID не найден',
     });
   }
+  if (err.message === 'Forbidden') {
+    return res.status(403).send({
+      message: 'Forbidden',
+    });
+  }
   return res.status(ERROR_CODE_DEFAULT).send({
     message: 'Произошла ошибка',
   });

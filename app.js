@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { ERROR_CODE_NOT_FOUND } = require('./utils/constants');
+const { ERROR_CODE_INVALID_DATA, ERROR_CODE_DEFAULT } = require('./utils/constants');
 const register = require('./middlewares/register');
 const auth = require('./middlewares/auth');
 const {
@@ -25,10 +25,28 @@ app.use('/users', auth, require('./routes/users'));
 
 app.use('/cards', auth, require('./routes/cards'));
 
-app.use((req, res) => {
-  res.status(ERROR_CODE_NOT_FOUND).send({
-    message: 'Некорректный запрос',
-  });
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.log(err);
+  const { statusCode = ERROR_CODE_DEFAULT, message } = err;
+
+  if (err.name === 'ValidationError') {
+    return res.status(ERROR_CODE_INVALID_DATA).send({
+      message: 'Некорректно введены данные',
+    });
+  }
+  if (err.name === 'CastError') {
+    return res.status(ERROR_CODE_INVALID_DATA).send({
+      message: 'Некорректно введен ID',
+    });
+  }
+  return res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
 });
 
 app.listen(PORT, () => {
