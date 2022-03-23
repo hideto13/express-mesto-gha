@@ -1,12 +1,11 @@
 const validator = require('validator');
+const InvalidError = require('../errors/Unauthorized');
 
 module.exports = (req, res, next) => {
   const { email } = req.body;
 
   if (!validator.isEmail(email)) {
-    return res
-      .status(401)
-      .send({ message: 'Необходима авторизация' });
+    next(new InvalidError('Некорректный email'));
   }
   return next();
 };

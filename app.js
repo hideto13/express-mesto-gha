@@ -1,13 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { ERROR_CODE_INVALID_DATA, ERROR_CODE_DEFAULT } = require('./utils/constants');
+const { ERROR_CODE_BAD_REQUEST, ERROR_CODE_DEFAULT, ERROR_CODE_CONFLICT } = require('./utils/constants');
 const register = require('./middlewares/register');
 const auth = require('./middlewares/auth');
 const {
   createUser,
   login,
 } = require('./controllers/users');
+const NotFoundError = require('./errors/NotFound');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -25,30 +26,34 @@ app.use('/users', auth, require('./routes/users'));
 
 app.use('/cards', auth, require('./routes/cards'));
 
+app.use((req, res, next) => {
+  next(new NotFoundError('Некорректный запрос'));
+});
+
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  console.log(err);
   const { statusCode = ERROR_CODE_DEFAULT, message } = err;
 
   if (err.name === 'ValidationError') {
-    return res.status(ERROR_CODE_INVALID_DATA).send({
+    return res.status(ERROR_CODE_BAD_REQUEST).send({
       message: 'Некорректно введены данные',
     });
   }
   if (err.name === 'CastError') {
-    return res.status(ERROR_CODE_INVALID_DATA).send({
+    return res.status(ERROR_CODE_BAD_REQUEST).send({
       message: 'Некорректно введен ID',
+    });
+  }
+  if (err.code === 11000) {
+    return res.status(ERROR_CODE_CONFLICT).send({
+      message: 'Пользователь с таким email уже зарегистрирован',
     });
   }
   return res
     .status(statusCode)
     .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
+      message: message || 'На сервере произошла ошибка',
     });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT);

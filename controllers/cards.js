@@ -1,7 +1,6 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/NotFound');
 const ForbiddenError = require('../errors/Forbidden');
-// const { handleResponseError } = require('../utils/handleResponseError');
 
 const getCardObj = (card) => {
   const obj = {
