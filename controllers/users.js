@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { handleResponseError } = require('../utils/handleResponseError');
 
@@ -29,6 +30,15 @@ module.exports.getUser = (req, res) => {
     .catch((err) => handleResponseError(err, res));
 };
 
+module.exports.getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .orFail(() => {
+      throw new Error('NotFound');
+    })
+    .then((user) => res.send(getUserObj(user)))
+    .catch((err) => handleResponseError(err, res));
+};
+
 module.exports.createUser = (req, res) => {
   const {
     name, email, password, about, avatar,
@@ -39,6 +49,18 @@ module.exports.createUser = (req, res) => {
       name, email, password: hash, about, avatar,
     }))
     .then((user) => res.send(getUserObj(user)))
+    .catch((err) => handleResponseError(err, res));
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+
+      res.send({ token });
+    })
     .catch((err) => handleResponseError(err, res));
 };
 
