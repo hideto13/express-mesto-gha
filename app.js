@@ -36,7 +36,7 @@ app.use((err, req, res, next) => {
 
   if (err.name === 'ValidationError') {
     return res.status(ERROR_CODE_BAD_REQUEST).send({
-      message: 'Некорректно введены данные',
+      message: message || 'Некорректно введены данные',
     });
   }
   if (err.name === 'CastError') {
