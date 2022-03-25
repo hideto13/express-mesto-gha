@@ -1,6 +1,7 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/NotFound');
 const ForbiddenError = require('../errors/Forbidden');
+const BadRequestError = require('../errors/BadRequesError');
 
 const getCardObj = (card) => {
   const obj = {
@@ -25,7 +26,13 @@ module.exports.createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(getCardObj(card)))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректно введены данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -41,7 +48,13 @@ module.exports.deleteCard = (req, res, next) => {
       Card.deleteOne(req.params.cardId)
         .then((card) => res.send(getCardObj(card)));
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Некорректно введен ID'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -54,7 +67,13 @@ module.exports.likeCard = (req, res, next) => {
       throw new NotFoundError('ID не найден');
     })
     .then((card) => res.send(getCardObj(card)))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Некорректно введен ID'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -67,5 +86,11 @@ module.exports.dislikeCard = (req, res, next) => {
       throw new NotFoundError('ID не найден');
     })
     .then((card) => res.send(getCardObj(card)))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Некорректно введен ID'));
+      } else {
+        next(err);
+      }
+    });
 };

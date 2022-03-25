@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFound');
+const ConflictError = require('../errors/ConflictError');
+const BadRequestError = require('../errors/BadRequesError');
 
 const getUserObj = (user) => {
   const obj = {
@@ -26,7 +28,13 @@ module.exports.getUser = (req, res, next) => {
       throw new NotFoundError('ID не найден');
     })
     .then((user) => res.send(getUserObj(user)))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Некорректно введен ID'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
@@ -43,12 +51,24 @@ module.exports.createUser = (req, res, next) => {
     name, email, password, about, avatar,
   } = req.body;
 
-  bcrypt.hash(password, 10)
+  User.findOne({ email }).then((user) => {
+    if (user) {
+      throw new ConflictError('Пользователь с таким email уже зарегистрирован');
+    } else {
+      return bcrypt.hash(password, 10);
+    }
+  })
     .then((hash) => User.create({
       name, email, password: hash, about, avatar,
     }))
-    .then((user) => res.send(getUserObj(user)))
-    .catch(next);
+    .then((user) => res.status(201).send(getUserObj(user)))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректно введены данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -60,7 +80,13 @@ module.exports.login = (req, res, next) => {
 
       res.send({ token });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректно введены данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -82,7 +108,13 @@ module.exports.updateUser = (req, res, next) => {
       throw new NotFoundError('ID не найден');
     })
     .then((user) => res.send(getUserObj(user)))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректно введены данные'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -100,5 +132,11 @@ module.exports.updateAvatar = (req, res, next) => {
       throw new NotFoundError('ID не найден');
     })
     .then((user) => res.send(getUserObj(user)))
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректно введены данные'));
+      } else {
+        next(err);
+      }
+    });
 };
