@@ -64,7 +64,7 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.status(201).send(getUserObj(user)))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Некорректно введены данные'));
+        next(new BadRequestError(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
       } else {
         next(err);
       }
@@ -82,7 +82,7 @@ module.exports.login = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Некорректно введены данные'));
+        next(new BadRequestError(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
       } else {
         next(err);
       }
@@ -110,7 +110,7 @@ module.exports.updateUser = (req, res, next) => {
     .then((user) => res.send(getUserObj(user)))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Некорректно введены данные'));
+        next(new BadRequestError(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
       } else {
         next(err);
       }
@@ -134,7 +134,7 @@ module.exports.updateAvatar = (req, res, next) => {
     .then((user) => res.send(getUserObj(user)))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Некорректно введены данные'));
+        next(new BadRequestError(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
       } else {
         next(err);
       }

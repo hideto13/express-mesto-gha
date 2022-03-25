@@ -28,7 +28,7 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.send(getCardObj(card)))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new BadRequestError('Некорректно введены данные'));
+        next(new BadRequestError(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
       } else {
         next(err);
       }
@@ -41,11 +41,11 @@ module.exports.deleteCard = (req, res, next) => {
       throw new NotFoundError('ID не найден');
     })
     .then((card) => {
-      if (req.user !== card.owner) {
+      if (!card.owner.equals(req.user._id)) {
         throw new ForbiddenError('Нет доступа');
       }
     }).then(() => {
-      Card.deleteOne(req.params.cardId)
+      Card.deleteOne({ _id: req.params.cardId })
         .then((card) => res.send(getCardObj(card)));
     })
     .catch((err) => {

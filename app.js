@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const register = require('./middlewares/register');
 const auth = require('./middlewares/auth');
 const {
   createUser,
@@ -17,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-app.post('/signup', register, createUser);
+app.post('/signup', createUser);
 
 app.post('/signin', login);
 
