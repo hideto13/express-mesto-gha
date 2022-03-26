@@ -44,10 +44,8 @@ module.exports.deleteCard = (req, res, next) => {
       if (!card.owner.equals(req.user._id)) {
         throw new ForbiddenError('Нет доступа');
       }
-    }).then(() => {
-      Card.deleteOne({ _id: req.params.cardId })
-        .then((card) => res.send(getCardObj(card)));
-    })
+    }).then(() => Card.deleteOne({ _id: req.params.cardId })
+      .then((card) => res.send(getCardObj(card))))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Некорректно введен ID'));
