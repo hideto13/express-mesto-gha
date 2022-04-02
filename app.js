@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { celebrate, errors, Joi } = require('celebrate');
 const auth = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const {
   createUser,
   login,
@@ -16,6 +17,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
+
+app.use(requestLogger);
 
 app.post('/signup', celebrate({
   body: Joi.object().keys({
@@ -41,6 +44,8 @@ app.use('/cards', auth, require('./routes/cards'));
 app.use(auth, (req, res, next) => {
   next(new NotFoundError('Некорректный запрос'));
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 
